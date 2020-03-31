@@ -21,9 +21,9 @@ from bokeh.themes import Theme
 from tornado.ioloop import IOLoop
 from bokeh.models import LinearAxis, Range1d,LabelSet
 from bokeh.sampledata.sea_surface_temperature import sea_surface_temperature
+from threading import Thread
 
 import numpy as np
-import facile
 import pulp
 from functools import reduce
 
@@ -333,14 +333,15 @@ class Interface:
 
     def updateUnit(self, attrname, old, new):
         L = ["Athena","Artemis","Hades","Zeus","Poseidon","Hera"]
+        print(self.selectUnit.active)
         if L[new] == "Poseidon":
             self.imgUnit[-1].figure.visible = False
             self.unitInput[-1].visible = False
-            self.selectUnit.active = self.selectUnit.active[:-1]
+            self.selectUnit.active = [1,2,3,4,5,6,7]
         else:
             self.imgUnit[-1].figure.visible = True
             self.unitInput[-1].visible = True
-            self.selectUnit.active +=  [8]
+            self.selectUnit.active = [1,2,3,4,5,6,7,8]
         self.grepolis.setDieu(L[new])
         unit = Add(L[new])
         self.selectUnit.labels = ["Combattant","Frondeur","Archer","Hoplite","Cavalier","Char","Envoye"]+unit
@@ -400,8 +401,7 @@ class Interface:
             pass
 
 
-def modify_doc(doc):
-
+def bkapp(doc):
     doc.add_root(Interface().doc)
 
 
@@ -414,17 +414,14 @@ def bkapp_page():
 def bk_worker():
     # Can't pass num_procs > 1 in this configuration. If you need to run multiple
     # processes, see e.g. flask_gunicorn_embed.py
-    server = Server({'/bkapp': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"])
+    server = Server({'/bkapp': bkapp}, io_loop=IOLoop(), allow_websocket_origin=["*"])
     server.start()
     server.io_loop.start()
 
-from threading import Thread
 Thread(target=bk_worker).start()
 
 if __name__ == '__main__':
-    print('Opening single process Flask app with embedded Bokeh application on http://localhost:8000/')
-    print()
-    print('Multiple connections may block the Bokeh app in this configuration!')
-    print('See "flask_gunicorn_embed.py" for one way to run multi-process')
     app.run(port=8000)
+
+
 
