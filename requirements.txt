@@ -1,3 +1,6 @@
 pulp
 bokeh
 flask
+threading
+numpy
+tornado
